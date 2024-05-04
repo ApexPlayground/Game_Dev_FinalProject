@@ -11,7 +11,10 @@ public class PlayerAttack : MonoBehaviour
 
     private Animator _anim;
     private PlayerMovement _playerMovement;
-    private float cooldownTimer = Mathf.Infinity;
+    private float _cooldownTimer = Mathf.Infinity;
+
+    private static readonly int Attack1 = Animator.StringToHash("attack");
+
     // Start is called before the first frame update
     void Start()
     {
@@ -21,17 +24,17 @@ public class PlayerAttack : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButton(0) && cooldownTimer > attackCooldown && _playerMovement.canAttack())
+        if (Input.GetMouseButton(0) && _cooldownTimer > attackCooldown && _playerMovement.CanAttack())
             Attack();
 
-        cooldownTimer += Time.deltaTime;
+        _cooldownTimer += Time.deltaTime;
     }
 
     // ReSharper disable Unity.PerformanceAnalysis
     private void Attack()
     {
-        _anim.SetTrigger("attack");
-        cooldownTimer = 0;
+        _anim.SetTrigger(Attack1);
+        _cooldownTimer = 0;
 
         fireballs[FindFireball()].transform.position = firePoint.position;
         fireballs[FindFireball()].GetComponent<Projectile>().SetDirection(Mathf.Sign(transform.localScale.x));

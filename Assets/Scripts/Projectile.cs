@@ -6,10 +6,11 @@ public class Projectile : MonoBehaviour
 
     private float _direction;  // Movement direction
     private bool _hit;  // Indicates if hit occurred
-    private float _lifetime;  // Time active
+    private float _lifetime;  // fireball lifetime active
 
     private Animator _anim;  // Animator for effects
     private BoxCollider2D _boxCollider;  // Collision detection
+    private static readonly int Explode = Animator.StringToHash("explode");
 
     private void Start()
     {
@@ -32,7 +33,7 @@ public class Projectile : MonoBehaviour
     {
         _hit = true;
         _boxCollider.enabled = false;
-        _anim.SetTrigger("explode");  // Trigger explosion animation
+        _anim.SetTrigger(Explode);  // Trigger explosion animation
     }
 
     public void SetDirection(float direction)
@@ -43,14 +44,13 @@ public class Projectile : MonoBehaviour
         _hit = false;  // Reset hit status
         _boxCollider.enabled = true;  // Enable collider
 
-        // Flip scale if direction differs from current
-        float localScaleX = transform.localScale.x;
-        if (Mathf.Sign(localScaleX) != Mathf.Sign(direction))
-        {
-            localScaleX *= -1;  // Flip horizontal scale
-        }
-        transform.localScale = new Vector3(localScaleX, transform.localScale.y, transform.localScale.z);
+
+        var localScale = transform.localScale;
+        float localScaleX = Mathf.Abs(localScale.x);  // Use the absolute value to handle scale uniformly
+        localScale = new Vector3(Mathf.Sign(direction) * localScaleX, localScale.y, localScale.z);
+        transform.localScale = localScale;
     }
+
 
 
 
