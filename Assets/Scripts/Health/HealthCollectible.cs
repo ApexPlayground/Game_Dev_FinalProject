@@ -1,15 +1,18 @@
 using UnityEngine;
 
-public class HealthCollectible : MonoBehaviour
+namespace Health
 {
-    public float healthValue;
-
-    private void OnTriggerEnter2D(Collider2D collision)
+    public class HealthCollectible : MonoBehaviour
     {
-        if (collision.CompareTag("Player"))
+        public float healthValue;
+
+        private void OnTriggerEnter2D(Collider2D collision)
         {
-            collision.GetComponent<Health>().AddHealth(healthValue);
-            gameObject.SetActive(false);
+            if (collision.CompareTag("Player"))
+            {
+                collision.GetComponent<global::Health.Health>().AddHealth(healthValue);
+                gameObject.SetActive(false);
+            }
         }
     }
 }

@@ -1,64 +1,72 @@
-using System;
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
-public class Health : MonoBehaviour
+namespace Health
 {
-    public float startingHealth;
-    public float CurrentHealth { get; private set; }
-    private Animator _anim;
-    private bool _dead;
-    private static readonly int Hurt = Animator.StringToHash("hurt");
-    private static readonly int Die = Animator.StringToHash("die");
-    [Header("iFrames")]
-    public float iFramesDuration;
-    public int numberOfFlashes;
-    private SpriteRenderer _spriteRend;
-
-    private void Start()
+    public class Health : MonoBehaviour
     {
-        CurrentHealth = startingHealth;
-        _anim = GetComponent<Animator>();
-        _spriteRend = GetComponent<SpriteRenderer>();
-    }
-    public void TakeDamage(float damage)
-    {
-        CurrentHealth = Mathf.Clamp(CurrentHealth - damage, 0, startingHealth);
+        public float startingHealth;
+        public float CurrentHealth { get; private set; }
+        private Animator _anim;
+        private bool _dead;
+        private static readonly int Hurt = Animator.StringToHash("hurt");
+        private static readonly int Die = Animator.StringToHash("die");
+        [Header("iFrames")]
+        public float iFramesDuration;
+        public int numberOfFlashes;
+        private SpriteRenderer _spriteRend;
 
-        if (CurrentHealth > 0)
+        private void Start()
         {
-            _anim.SetTrigger(Hurt);
-            StartCoroutine(Invulnerability());
-           
+            CurrentHealth = startingHealth;
+            _anim = GetComponent<Animator>();
+            _spriteRend = GetComponent<SpriteRenderer>();
         }
-        else
+        public void TakeDamage(float damage)
         {
-            if (!_dead)
+            CurrentHealth = Mathf.Clamp(CurrentHealth - damage, 0, startingHealth);
+
+            if (CurrentHealth > 0)
             {
-                _anim.SetTrigger(Die);
-                GetComponent<PlayerMovement>().enabled = false;
-                _dead = true;
+                _anim.SetTrigger(Hurt);
+                StartCoroutine(Invulnerability());
+           
+            }
+            else
+            {
+                if (!_dead)
+                {
+                    _anim.SetTrigger(Die);
+                    GetComponent<PlayerMovement>().enabled = false;
+                    _dead = true;
+                }
             }
         }
-    }
-    public void AddHealth(float value)
-    {
-        CurrentHealth = Mathf.Clamp(CurrentHealth + value, 0, startingHealth);
-    }
-    
-    private IEnumerator Invulnerability()
-    {
-        Physics2D.IgnoreLayerCollision(10, 11, true);
-        for (int i = 0; i < numberOfFlashes; i++)
+        public void AddHealth(float value)
         {
-            Color color;
-            color = new Color(1, 0, 0, 0.5f);
-            yield return new WaitForSeconds(iFramesDuration / (numberOfFlashes * 2));
-            color = Color.white;
-            _spriteRend.color = color;
-            yield return new WaitForSeconds(iFramesDuration / (numberOfFlashes * 2));
+            CurrentHealth = Mathf.Clamp(CurrentHealth + value, 0, startingHealth);
         }
-        Physics2D.IgnoreLayerCollision(10, 11, false);
-    }
     
+        private IEnumerator Invulnerability()
+        {
+            // Ignore collisions between player and traps
+            Physics2D.IgnoreLayerCollision(8, 9, true);
+
+            for (int i = 0; i < numberOfFlashes; i++)
+            {
+                // Set the sprite color to red to indicate damage
+                _spriteRend.color = new Color(1, 0, 0, 0.5f);  // Red, semi-transparent
+                yield return new WaitForSeconds(iFramesDuration / (numberOfFlashes * 2));
+
+                // Reset the sprite color to normal
+                _spriteRend.color = Color.white;
+                yield return new WaitForSeconds(iFramesDuration / (numberOfFlashes * 2));
+            }
+
+            // Re-enable collisions between player and traps
+            Physics2D.IgnoreLayerCollision(8, 9, false);
+        }
+
+    
+    }
 }

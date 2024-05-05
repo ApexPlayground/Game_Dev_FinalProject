@@ -11,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask wallLayer;
     private Rigidbody2D _body;
     private Animator _anim;
-    private BoxCollider2D _boxCollider;
+    private CapsuleCollider2D _capsuleCollider;
     private float _wallJumpCooldown;
     private float _horizontalInput;
     private static readonly int Jump1 = Animator.StringToHash("jump");
@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
         
         _body = GetComponent<Rigidbody2D>();
         _anim = GetComponentInParent<Animator>();
-        _boxCollider = GetComponent<BoxCollider2D>();
+        _capsuleCollider = GetComponent<CapsuleCollider2D>();
 
     }
 
@@ -106,18 +106,24 @@ public class PlayerMovement : MonoBehaviour
     // Checks if the player is grounded
     private bool IsGrounded()
     {
-        var bounds = _boxCollider.bounds;
-        RaycastHit2D rayCastHit = Physics2D.BoxCast(bounds.center, bounds.size, 0, Vector2.down, 0.1f, groundLayer);
-        return rayCastHit.collider != null;
+        var bounds = _capsuleCollider.bounds;
+        float castDistance = 0.1f; // Small distance below the collider
+        // CapsuleCast requires direction to be explicitly defined, for a vertical capsule use CapsuleDirection2D.Vertical
+        RaycastHit2D raycastHit = Physics2D.CapsuleCast(bounds.center, bounds.size, CapsuleDirection2D.Vertical, 0, Vector2.down, castDistance, groundLayer);
+        return raycastHit.collider != null;
     }
+
     
     // Checks if the player is touching a wall
     private bool OnWall()
     {
-        var bounds = _boxCollider.bounds;
-        RaycastHit2D rayCastHit = Physics2D.BoxCast(bounds.center, bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, wallLayer);
-        return rayCastHit.collider != null;
+        var bounds = _capsuleCollider.bounds;
+        Vector2 direction = transform.right * Mathf.Sign(transform.localScale.x); // Adjust based on player facing
+        float castDistance = 0.1f; // Small distance to detect walls
+        RaycastHit2D raycastHit = Physics2D.CapsuleCast(bounds.center, bounds.size, CapsuleDirection2D.Vertical, 0, direction, castDistance, wallLayer);
+        return raycastHit.collider != null;
     }
+
     
     // Determines if the player can attack
     public bool CanAttack()

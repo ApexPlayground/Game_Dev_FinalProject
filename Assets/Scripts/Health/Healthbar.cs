@@ -1,18 +1,21 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Healthbar : MonoBehaviour
+namespace Health
 {
-    public Health playerHealth;
-    public Image totalHealthBar;
-    public Image currentHealthBar;
+    public class Healthbar : MonoBehaviour
+    {
+        public global::Health.Health playerHealth;
+        public Image totalHealthBar;
+        public Image currentHealthBar;
 
-    private void Start()
-    {
-        totalHealthBar.fillAmount = playerHealth.CurrentHealth / 10;
-    }
-    private void Update()
-    {
-        currentHealthBar.fillAmount = playerHealth.CurrentHealth / 10;
+        private void Start()
+        {
+            totalHealthBar.fillAmount = playerHealth.CurrentHealth / 10;
+        }
+        private void Update()
+        {
+            currentHealthBar.fillAmount = playerHealth.CurrentHealth / 10;
+        }
     }
 }
