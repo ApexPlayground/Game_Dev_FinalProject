@@ -1,4 +1,5 @@
 using System.Collections;
+using Enemies;
 using UnityEngine;
 
 namespace Health
@@ -37,7 +38,22 @@ namespace Health
                 if (!_dead)
                 {
                     _anim.SetTrigger(Die);
-                    GetComponent<PlayerMovement>().enabled = false;
+
+                    if (GetComponent<PlayerMovement>() != null)
+                    {
+                        GetComponent<PlayerMovement>().enabled = false;
+                    }
+
+                    //Enemy
+                    if (GetComponentInParent<EnemyPatrol>() != null)
+                    {
+                        GetComponentInParent<EnemyPatrol>().enabled = false;
+                    }
+                    
+                    if(GetComponent<MeleeEnemy>() != null)
+                    {
+                        GetComponent<MeleeEnemy>().enabled = false;
+                    }
                     _dead = true;
                 }
             }

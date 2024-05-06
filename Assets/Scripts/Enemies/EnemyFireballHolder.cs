@@ -1,7 +1,14 @@
-﻿namespace Enemies
+﻿using UnityEngine;
+
+namespace Enemies
 {
-    public class EnemyFireballHolder
+    public class EnemyFireballHolder : MonoBehaviour
     {
-        
+        public Transform enemy;
+
+        private void Update()
+        {
+            transform.localScale = enemy.localScale;
+        }
     }
 }
