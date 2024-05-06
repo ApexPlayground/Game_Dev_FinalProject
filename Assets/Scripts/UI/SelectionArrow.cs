@@ -6,8 +6,6 @@ namespace UI
     public class SelectionArrow : MonoBehaviour
     {
         public RectTransform[] buttons;
-        public AudioClip changeSound;
-        public AudioClip interactSound;
         private RectTransform _arrow;
         private int _currentPosition;
 
@@ -55,8 +53,6 @@ namespace UI
         // ReSharper disable Unity.PerformanceAnalysis
         private void Interact()
         {
-           
-
             //Access the button component on each option and call its function
             buttons[_currentPosition].GetComponent<Button>().onClick.Invoke();
         }

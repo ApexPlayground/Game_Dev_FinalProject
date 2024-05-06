@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - Checkpoint
   - Start
+  - GameManager
   layers:
   - Default
   - TransparentFX
