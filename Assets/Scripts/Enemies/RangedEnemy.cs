@@ -70,7 +70,8 @@ namespace Enemies
         private bool PlayerInSight()
         {
             var bounds = capsuleCollider.bounds;
-            var direction = transform.right * Mathf.Sign(transform.localScale.x);
+            var transform1 = transform;
+            var direction = transform1.right * Mathf.Sign(transform1.localScale.x);
             var size = new Vector2(bounds.size.x * colliderDistance, bounds.size.y);
             var distance = range;
 

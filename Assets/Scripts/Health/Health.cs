@@ -6,16 +6,23 @@ namespace Health
 {
     public class Health : MonoBehaviour
     {
-        public float startingHealth;
+        [Header ("Health")]
+        [SerializeField] private float startingHealth;
         public float CurrentHealth { get; private set; }
         private Animator _anim;
         private bool _dead;
-        private static readonly int Hurt = Animator.StringToHash("hurt");
-        private static readonly int Die = Animator.StringToHash("die");
+
         [Header("iFrames")]
         public float iFramesDuration;
         public int numberOfFlashes;
         private SpriteRenderer _spriteRend;
+
+        [Header("Components")]
+        [SerializeField] private Behaviour[] components;
+        private bool _invulnerable;
+        private static readonly int Hurt = Animator.StringToHash("hurt");
+        private static readonly int Die = Animator.StringToHash("die");
+        private static readonly int Grounded = Animator.StringToHash("grounded");
 
         private void Start()
         {
@@ -25,35 +32,26 @@ namespace Health
         }
         public void TakeDamage(float damage)
         {
+            if (_invulnerable) return;
             CurrentHealth = Mathf.Clamp(CurrentHealth - damage, 0, startingHealth);
 
             if (CurrentHealth > 0)
             {
                 _anim.SetTrigger(Hurt);
                 StartCoroutine(Invulnerability());
-           
             }
             else
             {
                 if (!_dead)
                 {
+                   
+
+                    //Deactivate all attached component classes
+                    foreach (Behaviour component in components)
+                        component.enabled = false;
+                    _anim.SetBool(Grounded, true);
                     _anim.SetTrigger(Die);
 
-                    if (GetComponent<PlayerMovement>() != null)
-                    {
-                        GetComponent<PlayerMovement>().enabled = false;
-                    }
-
-                    //Enemy
-                    if (GetComponentInParent<EnemyPatrol>() != null)
-                    {
-                        GetComponentInParent<EnemyPatrol>().enabled = false;
-                    }
-                    
-                    if(GetComponent<MeleeEnemy>() != null)
-                    {
-                        GetComponent<MeleeEnemy>().enabled = false;
-                    }
                     _dead = true;
                 }
             }
@@ -62,7 +60,6 @@ namespace Health
         {
             CurrentHealth = Mathf.Clamp(CurrentHealth + value, 0, startingHealth);
         }
-    
         private IEnumerator Invulnerability()
         {
             // Ignore collisions between player and traps
@@ -82,7 +79,19 @@ namespace Health
             // Re-enable collisions between player and traps
             Physics2D.IgnoreLayerCollision(8, 9, false);
         }
+        
+        //Respawn
+        public void Respawn()
+        {
+            _dead = false;
+            AddHealth(startingHealth);
+            _anim.ResetTrigger(Die);
+            _anim.Play("idle");
+            StartCoroutine(Invulnerability());
 
-    
+            //Activate all attached component classes
+            foreach (Behaviour component in components)
+                component.enabled = true;
+        }
     }
 }

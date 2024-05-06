@@ -25,7 +25,7 @@ namespace Enemies
 
         private static readonly int Moving = Animator.StringToHash("moving");
 
-        private void Awake()
+        private void Start()
         {
             _initScale = enemy.localScale;
         }

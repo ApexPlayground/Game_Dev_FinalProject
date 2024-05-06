@@ -14,9 +14,27 @@ public class PlayerMovement : MonoBehaviour
     private CapsuleCollider2D _capsuleCollider;
     private float _wallJumpCooldown;
     private float _horizontalInput;
-    private static readonly int Jump1 = Animator.StringToHash("jump");
+    
+    [Header("Coyote Time")]
+    public float coyoteTime; 
+    private float _coyoteCounter; 
+
+    [Header("Multiple Jumps")]
+    public int extraJumps;
+    private int _jumpCounter;
+    
+    [Header("Wall Jumping")]
+    public float wallJumpX; 
+    public float wallJumpY; 
+    
+  
     private static readonly int Run = Animator.StringToHash("run");
     private static readonly int Grounded = Animator.StringToHash("grounded");
+
+    public PlayerMovement(float wallJumpCooldown)
+    {
+        _wallJumpCooldown = wallJumpCooldown;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -28,7 +46,7 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    // Update is called once per frame
+    
     private void FixedUpdate()
     {
         _horizontalInput = Input.GetAxis("Horizontal");
@@ -52,54 +70,65 @@ public class PlayerMovement : MonoBehaviour
             _body.gravityScale = 3; // Ensure gravity is normal during regular movement
         }
 
-        // Handle wall interaction
-        if (OnWall() && !IsGrounded())
-        {
-            if (_wallJumpCooldown > 0.2f)
-            {
-                _body.gravityScale = 0;
-                _body.velocity = Vector2.zero;
-            }
-            else
-            {
-                _wallJumpCooldown += Time.deltaTime;
-            }
-        }
-
-        if (Input.GetKey(KeyCode.Space))
-        {
+        //Jump
+        if (Input.GetKeyDown(KeyCode.Space))
             Jump();
+
+        //Adjustable jump height
+        if (Input.GetKeyUp(KeyCode.Space) && _body.velocity.y > 0)
+            _body.velocity = new Vector2(_body.velocity.x, _body.velocity.y / 2);
+
+        if (OnWall())
+        {
+            _body.gravityScale = 0;
+            _body.velocity = Vector2.zero;
         }
         else
         {
-            _wallJumpCooldown += Time.deltaTime;
+            _body.gravityScale = 3;
+            _body.velocity = new Vector2(_horizontalInput * speed, _body.velocity.y);
+
+            if (IsGrounded())
+            {
+                _coyoteCounter = coyoteTime; //Reset coyote counter when on the ground
+                _jumpCounter = extraJumps; //Reset jump counter to extra jump value
+            }
+            else
+                _coyoteCounter -= Time.deltaTime; //Start decreasing coyote counter when not on the ground
         }
-        
      
     }
     
     // Handles player jumping
     private void Jump()
     {
-        if (IsGrounded())
+        if (_coyoteCounter <= 0 && !OnWall() && _jumpCounter <= 0)
         {
-            _body.velocity = new Vector2(_body.velocity.x, jumpPower);
-            _anim.SetTrigger(Jump1);
-        }else if (OnWall() && !IsGrounded())
+            return;
+        }
+        if (OnWall())
+            WallJump();
+        else
         {
-            if (_horizontalInput == 0)
-            {
-                var localScale = transform.localScale;
-                _body.velocity = new Vector2( -Mathf.Sign(localScale.x) * 10, 0);
-                localScale = new Vector3(Mathf.Sign(_horizontalInput) * Mathf.Abs( localScale.x),  localScale.y,  localScale.z);
-                transform.localScale = localScale;
-            }
+            if (IsGrounded())
+                _body.velocity = new Vector2(_body.velocity.x, jumpPower);
             else
             {
-                
-                _body.velocity = new Vector2( -Mathf.Sign(transform.localScale.x) * 3, 6);
+                //If not on the ground and coyote counter bigger than 0 do a normal jump
+                if (_coyoteCounter > 0)
+                    _body.velocity = new Vector2(_body.velocity.x, jumpPower);
+                else
+                {
+                    if (_jumpCounter > 0) //If we have extra jumps then jump and decrease the jump counter
+                    {
+                        _body.velocity = new Vector2(_body.velocity.x, jumpPower);
+                        _jumpCounter--;
+                    }
+                }
             }
-            _wallJumpCooldown = 0;
+
+            //Reset coyote counter to 0 to avoid double jumps
+            _coyoteCounter = 0;
         }
     }
     
@@ -112,13 +141,21 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit2D raycastHit = Physics2D.CapsuleCast(bounds.center, bounds.size, CapsuleDirection2D.Vertical, 0, Vector2.down, castDistance, groundLayer);
         return raycastHit.collider != null;
     }
+    
+    private void WallJump()
+    {
+        _body.AddForce(new Vector2(-Mathf.Sign(transform.localScale.x) * wallJumpX, wallJumpY));
+        _wallJumpCooldown = 0;
+    }
+
 
     
     // Checks if the player is touching a wall
     private bool OnWall()
     {
         var bounds = _capsuleCollider.bounds;
-        Vector2 direction = transform.right * Mathf.Sign(transform.localScale.x); // Adjust based on player facing
+        var transform1 = transform;
+        Vector2 direction = transform1.right * Mathf.Sign(transform1.localScale.x); // Adjust based on player facing
         float castDistance = 0.1f; // Small distance to detect walls
         RaycastHit2D raycastHit = Physics2D.CapsuleCast(bounds.center, bounds.size, CapsuleDirection2D.Vertical, 0, direction, castDistance, wallLayer);
         return raycastHit.collider != null;

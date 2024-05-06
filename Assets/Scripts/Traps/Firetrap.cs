@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Traps
@@ -17,16 +19,27 @@ namespace Traps
         private bool _active;
         private static readonly int Activated = Animator.StringToHash("activated");
 
-        private void Awake()
+        private Health.Health _playerHealth;
+
+        private void Start()
         {
             _anim = GetComponent<Animator>();
             _spriteRend = GetComponent<SpriteRenderer>();
+        }
+
+        private void Update()
+        {
+            if (_playerHealth != null && _active)
+            {
+                _playerHealth.TakeDamage(damage);
+            }
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.CompareTag("Player"))
             {
+                _playerHealth = collision.GetComponent<Health.Health>();
                 if (!_triggered)
                     StartCoroutine(ActivateFiretrap());
 
@@ -34,6 +47,15 @@ namespace Traps
                     collision.GetComponent<Health.Health>().TakeDamage(damage);
             }
         }
+
+        private void OnTriggerExit2D(Collider2D collision)
+        {
+            if (collision.CompareTag("Player"))
+            {
+                _playerHealth = null;
+            }
+        }
+
         private IEnumerator ActivateFiretrap()
         {
             _triggered = true;
