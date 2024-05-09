@@ -10,6 +10,7 @@ TagManager:
   - Checkpoint
   - Start
   - GameManager
+  - Win
   layers:
   - Default
   - TransparentFX

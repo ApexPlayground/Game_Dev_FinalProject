@@ -167,5 +167,12 @@ public class PlayerMovement : MonoBehaviour
     {
         return _horizontalInput == 0 && IsGrounded() && !OnWall();
     }
-    
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Win"))
+        {
+            
+        }
+    }
 }

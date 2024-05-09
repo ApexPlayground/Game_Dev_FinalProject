@@ -57,7 +57,7 @@ namespace UI
             }
             else if (_currentPosition == 2)
             {
-                //Open Credits
+               //Quit
             }
             else if (_currentPosition == 3)
                 Application.Quit();

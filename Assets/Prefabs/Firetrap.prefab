@@ -147,8 +147,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
-  activationDelay: 2
-  activeTime: 2
+  activationDelay: 0.5
+  activeTime: 3
 --- !u!61 &3274060929014142979
 BoxCollider2D:
   m_ObjectHideFlags: 0
